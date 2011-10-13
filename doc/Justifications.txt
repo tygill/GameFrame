@@ -1,0 +1,48 @@
+﻿GameFrame Justifications
+
+- Rather than follow the 'pure' entity/component system design of only refering to Entities by Id, there will also be an Entity object that will be passed around as a pointer so that systems can quickly and easily grab a set of entities and their components, and guarantee that those entities and their components won't be destroyed while they're being used.
+ - However, this shortcut will only be used for access. These Entities are const, and simply represent the state the Entity had when it was retrieved (modifications to the contents of the data inside the components must still be mutexed by each individual component class. All accessors should invisibly provide this locking.)
+ - All modifications to entities is done by id. Linking between entities (target, parent, etc.) are all done by id.
+- Sets of entities and such are returned by value so that different threads don't have to lock it the whole time the thread is being used.
+ - Threadsafe path for getting all entities with a set of ComponentTypes:
+  typedef boost::unordered_set<boost::shared_ptr<Entity> > Entities;
+  Entities getEntities(ComponentTypes) {
+    lock(entities);
+    EntityIds ids = lookupEntities(types.set());
+    Entities ents;
+    foreach (EntityId id, ids) {
+      ents.insert(lookupEntity(id));
+    }
+    return ents;
+  }
+- Should core classes be located in the scope gf::core::?
+ - This would allow Entity to be typedef'd to boost::shared_ptr<Entity>
+ - Would require some ambiguity between namespace gf:: and gf::core::
+  - Entity could mean gf::Entity (shared_ptr) or gf::core::Entity (class)
+- Object lifetimes and ownership:
+ - GameFrame owns EntitySystemThread
+  - EntitySystemThread owns EntitySystem
+   - Thus, EntitySystem can be passed as EntitySystem*, as it will never be destroyed before the managers (as systems cannot be removed)
+ - GameFrame owns EntityManager
+  - EntityManager shares ownership of Entity with EntityComponent
+  - EntityManager shares ownership of EntityComponent with EntitySystem
+ - EntityTemplate is owned by EntityFactory, or has individually limited lifetime (not centrally managered)
+ - GameFrame owns MessageManager
+  - MessageManager delegates ownership of Message to EntitySystem
+ - GameFrame owns ResourceManager
+  - ResourceManager shares ownership of Resource with EntityComponent
+  - ResourceManager shares ownership of Resource with EntitySystem
+
+// Scripting functions should be in the script manager
+
+// Scripting access to entities
+/*
+// Break into separate class? ScriptingManager? Handles all scripted names?
+//  That way, if this module is not needed, it won't be integrated in.
+// I like this idea.
+bool name(EntityId entId, const std::string& entName);
+
+EntityId create(const std::string& entName);
+bool exists(const std::string& entName) const;
+bool destroy(const std::string& entName);
+*/
