@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifndef id7C1B513E_1F02_4740_B9C28266A08A15EF
 #define id7C1B513E_1F02_4740_B9C28266A08A15EF
 
@@ -8,11 +8,11 @@ namespace gf {
     
     class Message {
     public:
-        Message();
-        ~Message();
+        Message() {}
+        virtual ~Message() {}
         
         MessageType type() const;
-        template<class T> static MessageType getType();
+        //template<class T> static MessageType getType();
     };
     
 }

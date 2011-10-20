@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifndef id6C46516B_444B_4C13_A68C3CAA516AC207
 #define id6C46516B_444B_4C13_A68C3CAA516AC207
 
@@ -6,10 +6,12 @@
 
 namespace gf {
     
+    class ResourceManager;
+    
     class ResourceTemplate {
     public:
-        ResourceTemplate();
-        ~ResourceTemplate();
+        ResourceTemplate() {}
+        virtual ~ResourceTemplate() {}
         
     private:
         friend class ResourceManager;

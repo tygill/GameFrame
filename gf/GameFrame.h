@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifndef idCE633B91_11A4_4E7F_84ECFC08322327EE
 #define idCE633B91_11A4_4E7F_84ECFC08322327EE
 
@@ -6,13 +6,12 @@
 #include "gf/EntityManager.h"
 #include "gf/ResourceManager.h"
 #include "gf/MessageManager.h"
-//#include "gf/EntitySystemThread.h"
+#include "gf/EntitySystem.h"
+#include "gf/EntitySystemThread.h"
 
 #include <boost/thread.hpp>
 
 namespace gf {
-    
-    class EntitySystemThread;
     
     class GameFrame {
     public:
@@ -35,7 +34,7 @@ namespace gf {
         typedef boost::ptr_unordered_map<uint8_t, EntitySystemThread> EntitySystemThreads;
         EntitySystemThreads systemThreads;
         
-        boost::ptr_unordered_set<boost::thread> threads;
+        boost::thread_group threads;
         
         EntityManager entities;
         ResourceManager resources;
@@ -43,11 +42,14 @@ namespace gf {
     };
     
     template<class T> T* GameFrame::addSystem(uint8_t thread) {
-    	std::pair<EntitySystems::iterator, bool> systemPair = systemThreads.insert(std::pair<uint8_t, EntitySystemThread*>(thread, new T()));
-    	if (systemPair.second) {
-    		return systemPair.first;
+        // We need to find out if this thread exists yet
+        EntitySystemThreads::iterator pos = systemThreads.find(thread);
+    	if (pos == systemThreads.end()) {
+            // A new thread should be created
+            std::pair<EntitySystems::iterator, bool> systemPair = systemThreads.insert(std::pair<uint8_t, EntitySystemThread*>(thread, new EntitySystemThread()));
+    		return (*systemPair.first)->addSystem<T>();
     	} else {
-    		return null_ptr;
+    		return pos->addSystem<T>();
     	}
     }
 

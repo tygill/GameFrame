@@ -1,4 +1,4 @@
-﻿#include "gf/GameFrame.h"
+#include "gf/GameFrame.h"
 #include "gf/EntitySystemThread.h"
 
 namespace gf {
@@ -12,13 +12,15 @@ namespace gf {
     }
     
     int GameFrame::run() {
-    	for (EntitySystems::iterator itr = entitySystems.begin(); itr != entitySystems.end(); itr++) {
-    		threads.insert(new boost::thread(itr.second));
+    	for (EntitySystemThreads::iterator itr = systemThreads.begin(); itr != systemThreads.end(); itr++) {
+    		threads.create_thread(boost::ref(*(itr->second)));
     	}
+        threads.join_all();
+        return 0;
     }
 
     EntityManager& GameFrame::entityManager() {
-    	return entites;
+    	return entities;
     }
 
     ResourceManager& GameFrame::resourceManager() {

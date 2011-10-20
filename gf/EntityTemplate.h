@@ -1,15 +1,16 @@
-﻿#pragma once
+#pragma once
 #ifndef id9E8E45AA_EE0C_441B_9B133AF1195FCE23
 #define id9E8E45AA_EE0C_441B_9B133AF1195FCE23
 
 #include "gf/Global.h"
+#include "gf/EntityManager.h"
 
 namespace gf {
     
     class EntityTemplate {
     public:
-        EntityTemplate();
-        ~EntityTemplate();
+        EntityTemplate() {}
+        virtual ~EntityTemplate() {}
         
     private:
         friend class EntityManager;

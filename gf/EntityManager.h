@@ -1,12 +1,13 @@
-﻿#pragma once
+#pragma once
 #ifndef idAE2BE7B6_9D35_4832_93CD220B7F0597C8
 #define idAE2BE7B6_9D35_4832_93CD220B7F0597C8
 
 #include "gf/Global.h"
+#include "gf/Entity.h"
 
 namespace gf {
     
-    typedef std::set<ComponentType> OrderedComponentTypes;
+    class EntityTemplate;
     
     class EntityManager {
     public:
@@ -15,7 +16,7 @@ namespace gf {
         
         EntityId create();
         EntityId create(EntityTemplate* form);
-        bool exists(entityId entId) const;
+        bool exists(EntityId entId) const;
         bool destroy(EntityId entId);
         
         template<class T> boost::shared_ptr<T> addComponent(EntityId entId);
@@ -39,6 +40,9 @@ namespace gf {
         EntityPtr getEntity(EntityId entId);
         
     private:
+        typedef std::set<ComponentType> OrderedComponentTypes;
+        typedef boost::unordered_map<uint32_t, boost::shared_ptr<Entity> > Entities;
+    
         // Set up the EntityComponentTree and Entity classes as other files.
         // Then figure out what this needs to have as member variables.
         class EntityComponentTree;
@@ -73,7 +77,7 @@ namespace gf {
         
     private:
         class EntityComponentTreeNode;
-        typedef boost::weak_ptr<EntityComponentTreeNode> Node;
+        typedef EntityComponentTreeNode* Node;
         
         void addComponent(ConstEntityPtr entity, ComponentType type, OrderedComponentTypes& types, Node node);
         void removeComponent(ConstEntityPtr entity, ComponentType type, OrderedComponentTypes& types, Node node);
@@ -106,10 +110,15 @@ namespace gf {
         Node getNext(ComponentType type, bool allowCreate = false);
         
     private:
+        friend class EntityManager::EntityComponentTree;
+        typedef boost::unordered_map<ComponentType, boost::shared_ptr<EntityComponentTreeNode> > NextNodes;
+        NextNodes getChildren() const;
+        
+    private:
         ConstEntityPtrs entities;
         boost::unordered_set<EntitySystem*> callbacks;
-        typedef boost::unordered_map<ComponentType, boost::shared_ptr<EntityComponentTreeNode> > NextNodes;
         NextNodes nextNodes;
+        
     };
     
     // Template functions for EntityManager
@@ -134,7 +143,7 @@ namespace gf {
     }
     
     template<class T> boost::shared_ptr<T> EntityManager::getComponent(EntityId entId) const {
-        EntityPtr entity = getEntiy(entId);
+        EntityPtr entity = getEntity(entId);
         if (entity) {
             return entity->getComponent<T>();
         } else {
@@ -142,8 +151,8 @@ namespace gf {
         }
     }
     
-    template<class T> bool EntityManager::removeComponent() {
-        EntityPtr entity = getEntiy(entId);
+    template<class T> bool EntityManager::removeComponent(EntityId entId) {
+        EntityPtr entity = getEntity(entId);
         if (entity) {
             return entity->removeComponent<T>();
         } else {
@@ -151,7 +160,7 @@ namespace gf {
         }
     }
     
-    template<class T> ConstEntityPtrs getEntities() const {
+    template<class T> ConstEntityPtrs EntityManager::getEntities() const {
         return getEntities(componentType<T>());
     }
     

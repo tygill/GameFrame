@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifndef id7533F2D8_5E80_4B45_902AF88DD7836049
 #define id7533F2D8_5E80_4B45_902AF88DD7836049
 
@@ -8,8 +8,8 @@ namespace gf {
     
     class EntityComponent {
     public:
-        EntityComponent();
-        ~EntityComponent();
+        EntityComponent() {}
+        virtual ~EntityComponent() {}
         
         // ComponentType is simply the typeid() of the subclass, but this should
         // hide away that abstraction, and allow access no matter what type of
@@ -20,7 +20,8 @@ namespace gf {
         // When you have an unknown component
         //static ComponentType type(EntityComponent* component);
         // When you know the name of the components type
-        template<class T> static ComponentType getType();
+        //template<class T> static ComponentType getType();
+        // Supersceded by the global componentType<T>() function
     };
     
 }

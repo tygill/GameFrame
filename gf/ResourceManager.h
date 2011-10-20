@@ -1,8 +1,9 @@
-﻿#pragma once
+#pragma once
 #ifndef id7AF8A304_D2F0_4D43_B157957EA22F00C1
 #define id7AF8A304_D2F0_4D43_B157957EA22F00C1
 
 #include "gf/Global.h"
+#include "gf/ResourceTemplate.h"
 
 namespace gf {
     
@@ -62,7 +63,7 @@ namespace gf {
         void unload(ResourceId resId);
         
     private:
-        class ResourceMetaData;
+        class ResourceMetadata;
         typedef boost::unordered_map<ResourceId, boost::shared_ptr<ResourceMetadata> > Metadatas;
         Metadatas resources;
         
@@ -92,7 +93,7 @@ namespace gf {
         // shared_ptr<ResourceType>, which allows one hard coded class to function
         // as a cache for any type of user defined Resource.
         boost::shared_ptr<Resource> resource;
-    }
+    };
     
 }
 
