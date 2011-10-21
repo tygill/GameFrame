@@ -1,0 +1,20 @@
+GameFrame
+
+GameFrame is an idea I've had for a while, finally beginning to come to fruition. It's original inspiration came from my initial experiences with programming on a PC, with a little program called Game Maker. It did a very good job of making it easy to do many things that I was to learn are much more difficult to accomplish in other languages - especially things that a computer game requires. But with the power that it gave, it also placed certain limitations in its design that required creative tricks to work around. When I began learning Java, I was frustrated by the lack of functionality I could find at the detailed level (image displaying, scrolling regions, etc.). As I learned C++, I learned even more how many things need to be built to make a game integrate with video, audio, senario, and dozens of other components.
+
+With GameFrame, I want to make a framework that requires a certain structure to its design, but that ultimately enables programmers to design and prototype games in a much simpler and easier to understand way, even when using a more complicated language like C++. Its far from perfect, and at present has only been actively developed since about August 2011, while I've been in school, but I have plans for it, and several ideas have already been prototyped in other projects and just need to be integrated or rewritten here.
+
+
+The current design of GameFrame is based on Adam Martin's series of articles titled, "Entity Systems are the future of MMOG development" (http://t-machine.org/index.php/2007/09/03/entity-systems-are-the-future-of-mmog-development-part-1/), though much of it is also changed.
+
+In a summary of the Entity/Component paradigm, each game object is represented as an Entity. Each Entity can have any number of Components associated with it. These Components define the state or properties of each Entity, but do not have actions associated with them. Actions then, come from a different type of object, a System. Systems provide functionality for all Entities with certain sets of Components.
+
+In Adam's ideal situation, each Entity is simply an id that maps to a set of Components. In my system, Entities are stored as actual objects to lower the time required to lookup multiple Components in the same Entity.
+
+
+My additions to this type of design are Resources and Messages. Resources provide a standardize method of defining the resources a game would require, that would benefit by being shared via a central cache. For example, audio files, sprites, or other dynamic content could be cached as a Resource that any component or system could use.
+
+Messages are this systems events. They allow one system to communicate with another without multiple systems needing to dig deeply into each others internals.
+
+
+At present very litle of these designs are really fully implemented. But I am working on it and trying to make it slowly become what I want. Ideally, it will eventually contain a threadsafe design and implementation of an Entity/Component System, and also a set of base libraries for core concepts (PositionComponent, VelocityComponent, MovementSystem, InputSystem, InputMessage, ImageResource, etc.), and I've looked at SDL and ffmpeg for graphics and video playback respectively, and have gotten both to run on Windows previously.
