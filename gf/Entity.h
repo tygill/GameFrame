@@ -9,9 +9,11 @@ namespace gf {
     
     class Entity {
     public:
-        // No construction/deletion necessary
-        //Entity();
-        //~Entity();
+        Entity();
+        Entity(const Entity& other);
+        ~Entity();
+        
+        bool operator==(const Entity& other) const;
         
         /* T extends EntityComponent */
         template<class T> boost::shared_ptr<T> addComponent();
@@ -19,42 +21,57 @@ namespace gf {
         template<class T> boost::shared_ptr<T> getComponent() const;
         template<class T> bool removeComponent();
         
-        ComponentTypes getTypes() const;
+        ComponentTypes types() const;
+        
+        void setId(EntityId newId);
+        EntityId id() const;
         
     private:
         typedef boost::unordered_map<ComponentType, boost::shared_ptr<EntityComponent> > ComponentMap;
         
     private:
-        ComponentTypes types;
+        ComponentTypes componentTypes;
         ComponentMap components;
+        
+        EntityId entId;
+        static EntityId nextId;
     };
+    
+    // Allow storage of Entity objects in unordered_set
+    std::size_t hash_value(const Entity& ent);
     
     // Template function definitions
     // -----------------------------
     
     template<class T> boost::shared_ptr<T> Entity::addComponent() {
-        boost::shared_ptr<T> component(new T());
-        ComponentType type(componentType<T>());
-        types.insert(type);
-        components.insert(std::pair<ComponentType, boost::shared_ptr<EntityComponent> >(type, component));
-        return component;
+        // Make sure the entitiy doesn't have a component of this type already
+        boost::shared_ptr<T> ent = getComponent<T>();
+        if (!ent) {
+            boost::shared_ptr<T> component(new T());
+            ComponentType type(componentType<T>());
+            componentTypes.insert(type);
+            components.insert(std::make_pair(type, component));
+            return component;
+        } else {
+            return ent;
+        }
     }
     
     template<class T> bool Entity::hasComponent() const {
-        return types.find(componentType<T>()) == types.end();
+        return componentTypes.find(componentType<T>()) != componentTypes.end();
     }
     
     template<class T> boost::shared_ptr<T> Entity::getComponent() const {
         ComponentMap::const_iterator pos = components.find(componentType<T>());
         if (pos != components.end()) {
-            return pos->second;
+            return boost::static_pointer_cast<T>(pos->second);
         } else {
             return boost::shared_ptr<T>();
         }
     }
     
     template<class T> bool Entity::removeComponent() {
-        return components.erase(componentType<T>()) > 0;
+        return components.erase(componentType<T>()) > 0 && componentTypes.erase(componentType<T>()) > 0;
     }
     
 }

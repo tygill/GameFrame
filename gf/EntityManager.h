@@ -4,6 +4,7 @@
 
 #include "gf/Global.h"
 #include "gf/Entity.h"
+#include "gf/Exceptions.h"
 
 namespace gf {
     
@@ -25,12 +26,19 @@ namespace gf {
         template<class T> bool removeComponent(EntityId entId);
         
         // Entity access
-        ConstEntityPtr getEntity(EntityId entId) const;
+        // Throws EntityNotFoundException
+        Entity entity(EntityId entId) const;
         
         /* T extends EntityComponent */
+        template<class T> Entities getEntities() const;
+        Entities getEntities(ComponentType type) const;
+        Entities getEntities(const ComponentTypes& types) const;
+        
+        /*
         template<class T> ConstEntityPtrs getEntities() const;
         ConstEntityPtrs getEntities(ComponentType type) const;
         ConstEntityPtrs getEntities(const ComponentTypes& types) const;
+        */
         
         void registerSystem(EntitySystem* system, ComponentType type);
         void registerSystem(EntitySystem* system, const ComponentTypes& types);
@@ -38,18 +46,20 @@ namespace gf {
     private:
         // Mutable Entity access is internal only
         EntityPtr getEntity(EntityId entId);
+        // EntityPtr access is internal only now too.
+        // Returns are only copies.
+        ConstEntityPtr getEntity(EntityId entId) const;
         
     private:
         typedef std::set<ComponentType> OrderedComponentTypes;
-        typedef boost::unordered_map<uint32_t, boost::shared_ptr<Entity> > Entities;
+        typedef boost::unordered_map<EntityId, EntityPtr > EntityMap;
     
         // Set up the EntityComponentTree and Entity classes as other files.
         // Then figure out what this needs to have as member variables.
         class EntityComponentTree;
         boost::scoped_ptr<EntityComponentTree> components;
         
-        Entities entities;
-        EntityId nextId;
+        EntityMap entities;
     };
     
     
@@ -134,7 +144,7 @@ namespace gf {
 	}
     
     template<class T> bool EntityManager::hasComponent(EntityId entId) const {
-        EntityPtr entity = getEntity(entId);
+        ConstEntityPtr entity = getEntity(entId);
         if (entity) {
             return entity->hasComponent<T>();
         } else {
@@ -143,7 +153,7 @@ namespace gf {
     }
     
     template<class T> boost::shared_ptr<T> EntityManager::getComponent(EntityId entId) const {
-        EntityPtr entity = getEntity(entId);
+        ConstEntityPtr entity = getEntity(entId);
         if (entity) {
             return entity->getComponent<T>();
         } else {
@@ -160,9 +170,15 @@ namespace gf {
         }
     }
     
+    template<class T> Entities EntityManager::getEntities() const {
+        return getEntities(componentType<T>());
+    }
+    
+    /*
     template<class T> ConstEntityPtrs EntityManager::getEntities() const {
         return getEntities(componentType<T>());
     }
+    */
     
 }
 

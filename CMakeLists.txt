@@ -2,31 +2,22 @@ cmake_minimum_required(VERSION 2.8)
 project(GAMEFRAME)
 
 
-# Core library (libGameFrame.a, GameFrame.dll, etc.)
-
-# Move to gf folder - build the binary there.
-include_directories("${PROJECT_SOURCE_DIR}")
-
+# Global project settings
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -std=c++0x")
 
-set(GAMEFRAME_CORE_LIB_CXX
-    "gf/Entity.cpp"
-    "gf/EntityComponent.cpp"
-    "gf/EntityManager.cpp"
-    "gf/EntitySystem.cpp"
-    "gf/EntitySystemThread.cpp"
-    "gf/EntityTemplate.cpp"
-    "gf/GameFrame.cpp"
-    "gf/Message.cpp"
-    "gf/MessageManager.cpp"
-    "gf/Resource.cpp"
-    "gf/ResourceManager.cpp"
-    "gf/ResourceTemplate.cpp"
+# CMake modules path
+set(CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    ${CMAKE_SOURCE_DIR}/cmake
 )
 
-add_library(GameFrame ${GAMEFRAME_CORE_LIB_CXX})
 
+
+# Core library
+add_subdirectory(gf)
+
+# Core library test cases
 add_subdirectory(test)
 
 

@@ -46,7 +46,7 @@ namespace gf {
         EntitySystemThreads::iterator pos = systemThreads.find(thread);
     	if (pos == systemThreads.end()) {
             // A new thread should be created
-            std::pair<EntitySystems::iterator, bool> systemPair = systemThreads.insert(std::pair<uint8_t, EntitySystemThread*>(thread, new EntitySystemThread()));
+            std::pair<EntitySystems::iterator, bool> systemPair = systemThreads.insert(std::make_pair(thread, new EntitySystemThread()));
     		return (*systemPair.first)->addSystem<T>();
     	} else {
     		return pos->addSystem<T>();

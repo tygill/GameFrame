@@ -4,8 +4,7 @@
 namespace gf {
 
 	EntityManager::EntityManager() :
-			components(new EntityComponentTree()),
-			nextId(1)
+			components(new EntityComponentTree())
 	{
 		//
 	}
@@ -15,15 +14,21 @@ namespace gf {
 	}
 
 	EntityId EntityManager::create() {
-		EntityId entId = nextId;
 	    EntityPtr entity(new Entity());
-	    bool success = entities.insert(std::pair<EntityId, EntityPtr>(entId, entity)).second;
+        entities.insert(std::make_pair(entity->id(), entity));
+        return entity->id();
+		/*
+        EntityId entId = nextId;
+	    EntityPtr entity(new Entity());
+	    bool success = entities.insert(std::make_pair(entId, entity)).second;
 	    while (!success) {
 	        entId++;
-	        success = entities.insert(std::pair<EntityId, EntityPtr>(entId, entity)).second;
+	        success = entities.insert(std::make_pair(entId, entity)).second;
 	    }
+        entity->setId(entId);
 	    nextId = entId + 1;
 	    return entId;
+        */
 	}
 
 	EntityId EntityManager::create(EntityTemplate* form) {
@@ -38,10 +43,35 @@ namespace gf {
 		return entities.erase(entId) > 0;
 	}
     
-    ConstEntityPtr EntityManager::getEntity(EntityId entId) const {
-        return getEntity(entId);
+    Entity EntityManager::entity(EntityId entId) const {
+        EntityMap::const_iterator pos = entities.find(entId);
+        if (pos != entities.end()) {
+            return Entity(*pos->second);
+        } else {
+            throw EntityNotFoundException(entId);
+        }
     }
     
+    Entities EntityManager::getEntities(ComponentType type) const {
+        ConstEntityPtrs ptrs = components->getEntities(type);
+        Entities ents;
+        for (ConstEntityPtrs::const_iterator itr = ptrs.begin(); itr != ptrs.end(); itr++) {
+            ents.insert(Entity(*(*itr)));
+        }
+        return ents;
+    }
+    
+    Entities EntityManager::getEntities(const ComponentTypes& types) const {
+        OrderedComponentTypes orderedTypes(types.begin(), types.end());
+        ConstEntityPtrs ptrs = components->getEntities(orderedTypes);
+        Entities ents;
+        for (ConstEntityPtrs::const_iterator itr = ptrs.begin(); itr != ptrs.end(); itr++) {
+            ents.insert(Entity(*(*itr)));
+        }
+        return ents;
+    }
+    
+    /*
     ConstEntityPtrs EntityManager::getEntities(ComponentType type) const {
         return components->getEntities(type);
     }
@@ -50,6 +80,7 @@ namespace gf {
         OrderedComponentTypes orderedTypes(types.begin(), types.end());
         return components->getEntities(orderedTypes);
     }
+    */
     
     void EntityManager::registerSystem(EntitySystem* system, ComponentType type) {
         components->registerSystem(system, type);
@@ -58,6 +89,24 @@ namespace gf {
     void EntityManager::registerSystem(EntitySystem* system, const ComponentTypes& types) {
         OrderedComponentTypes orderedTypes(types.begin(), types.end());
         components->registerSystem(system, orderedTypes);
+    }
+    
+    EntityPtr EntityManager::getEntity(EntityId entId) {
+        EntityMap::iterator pos = entities.find(entId);
+        if (pos != entities.end()) {
+            return pos->second;
+        } else {
+            return EntityPtr();
+        }
+    }
+    
+    ConstEntityPtr EntityManager::getEntity(EntityId entId) const {
+        EntityMap::const_iterator pos = entities.find(entId);
+        if (pos != entities.end()) {
+            return pos->second;
+        } else {
+            return ConstEntityPtr();
+        }
     }
     
     
@@ -104,7 +153,7 @@ namespace gf {
     void EntityManager::EntityComponentTree::addComponent(ConstEntityPtr entity, ComponentType type) {
         // Build the ordered types that would be affected in the tree by adding
         // this type
-        ComponentTypes unordered(entity->getTypes());
+        ComponentTypes unordered(entity->types());
         OrderedComponentTypes types;
         for (ComponentTypes::const_iterator itr = unordered.begin(); itr != unordered.end() && *itr < type; itr++) {
             types.insert(*itr);
@@ -115,7 +164,7 @@ namespace gf {
     void EntityManager::EntityComponentTree::removeComponent(ConstEntityPtr entity, ComponentType type) {
         // Build the ordered types that would be affected in the tree by adding
         // this type
-        ComponentTypes unordered(entity->getTypes());
+        ComponentTypes unordered(entity->types());
         OrderedComponentTypes types;
         for (ComponentTypes::const_iterator itr = unordered.begin(); itr != unordered.end() && *itr < type; itr++) {
             types.insert(*itr);
@@ -125,7 +174,7 @@ namespace gf {
     
     /*
     void EntityManager::EntityComponentTree::cacheComponents(ConstEntityPtr entity) {
-        OrderedComponentTypes ordered(entity->getTypes().begin(), entity->getTypes().end());
+        OrderedComponentTypes ordered(entity->types().begin(), entity->types().end());
         cacheComponents(entity, ordered, root);
     }
     */
@@ -239,7 +288,7 @@ namespace gf {
         if (pos == nextNodes.end()) {
             if (allowCreate) {
                 boost::shared_ptr<EntityComponentTreeNode> newNode(new EntityComponentTreeNode());
-                nextNodes.insert(std::pair<ComponentType, boost::shared_ptr<EntityComponentTreeNode> >(type, newNode));
+                nextNodes.insert(std::make_pair(type, newNode));
                 node = newNode.get();
             }
         } else {

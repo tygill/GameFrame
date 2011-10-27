@@ -27,7 +27,7 @@ namespace gf {
             pos->second.insert(system);
         } else {
             // Otherwise we just add it to the set
-            std::pair<MessageMap::iterator, bool> messagePair = messageMap.insert(std::pair<MessageType, boost::unordered_set<EntitySystem*> >(type, boost::unordered_set<EntitySystem*>()));
+            std::pair<MessageMap::iterator, bool> messagePair = messageMap.insert(std::make_pair(type, boost::unordered_set<EntitySystem*>()));
             messagePair.first->second.insert(system);
         }
     }

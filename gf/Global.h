@@ -66,6 +66,7 @@ namespace gf {
     typedef boost::unordered_set<EntityPtr> EntityPtrs;
     typedef boost::shared_ptr<Entity const> ConstEntityPtr;
     typedef boost::unordered_set<ConstEntityPtr> ConstEntityPtrs;
+    typedef boost::unordered_set<Entity> Entities;
     
     typedef boost::shared_ptr<Resource> ResourcePtr;
     typedef boost::shared_ptr<Resource const> ConstResourcePtr;
@@ -76,15 +77,15 @@ namespace gf {
     typedef boost::unordered_set<boost::shared_ptr<EntitySystem> > EntitySystems;
     
     template<class T> ComponentType componentType() {
-        return ComponentType(&typeid(T));
+        return ComponentType(typeid(T));
     }
     
     template<class T> ResourceType resourceType() {
-        return ResourceType(&typeid(T));
+        return ResourceType(typeid(T));
     }
     
     template<class T> MessageType messageType() {
-        return MessageType(&typeid(T));
+        return MessageType(typeid(T));
     }
     
 }

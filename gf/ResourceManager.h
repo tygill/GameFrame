@@ -20,6 +20,7 @@ namespace gf {
         // the use count.
         // REMEMBER THIS!! Things may need to be modified to make sure this works right
         // (Though I guess this could just return a null pointer if its unloaded)
+        // For now, it will just return null_ptr
         template<class T> boost::shared_ptr<T const> get(ResourceId resId) const;
         
         // Internally, ResourceManager keeps track of how many times load and unload have
@@ -47,6 +48,12 @@ namespace gf {
         
     private:
         class ResourceTypeManager;
+        
+        // Gets the manager for the given type of resources, creating it
+        // if one doesn't exist
+        ResourceTypeManager* getTypeManager(ResourceType type);
+        ResourceTypeManager const* getTypeManager(ResourceType type) const;
+        
         typedef boost::unordered_map<ResourceType, boost::shared_ptr<ResourceTypeManager> > TypeManagers;
         TypeManagers types;
     };
@@ -58,7 +65,7 @@ namespace gf {
         
         ResourceId define(boost::shared_ptr<ResourceTemplate> form);
         bool isLoaded(ResourceId resId) const;
-        boost::shared_ptr<Resource> get(ResourceId resId) const;
+        ResourcePtr get(ResourceId resId) const;
         void load(ResourceId resId);
         void unload(ResourceId resId);
         
@@ -76,7 +83,7 @@ namespace gf {
         ~ResourceMetadata();
         
         bool isLoaded() const;
-        boost::shared_ptr<Resource> get() const;
+        ResourcePtr get() const;
         void load();
         void unload();
         
@@ -87,13 +94,36 @@ namespace gf {
         // holding on to the Resource via some pointer somewhere, the program won't crash, but the
         // ResourceManager will simply let go of its copy, so that the moment the other holder of
         // the Resource lets go, it will be destroyed.)
-        uint32_t count;
+        uint64_t useCount;
         // The actual, cached resource. Swapped to NULL when not loaded.
         // Here, this shared_ptr<Resource> is dynamically castable to
         // shared_ptr<ResourceType>, which allows one hard coded class to function
         // as a cache for any type of user defined Resource.
-        boost::shared_ptr<Resource> resource;
+        ResourcePtr resource;
     };
+    
+    // Template Implementations
+    
+    // ResourceManager
+    // ---------------
+    
+    template<class T> ResourceId ResourceManager::define(boost::shared_ptr<ResourceTemplate> form) {
+        return define(resourceType<T>(), form);
+    }
+    
+    template<class T> boost::shared_ptr<T const> ResourceManager::get(ResourceId resId) const {
+        // dynamic cast could probably work too, but this is
+        // faster, and should never have issues anyway.
+        return static_cast<boost::shared_ptr<T const> >(get(resourceType<T>(), resId));
+    }
+    
+    template<class T> boost::shared_ptr<T const> ResourceManager::load(ResourceId resId) {
+        return static_cast<boost::shared_ptr<T const> >(load(resourceType<T>(), resId));
+    }
+    
+    template<class T> void ResourceManager::unload(ResourceId resId) {
+        unload(resourceType<T>(), resId);
+    }
     
 }
 

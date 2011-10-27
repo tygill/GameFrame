@@ -20,7 +20,7 @@ namespace gf {
         // Subclasses can decide if there is some form of state to a template,
         // or if state is static, or if the returned entity always has the same
         // info.
-        virtual boost::shared_ptr<Resource> create(ResourceManager* framework) = 0;
+        virtual ResourcePtr create() = 0;
     };
     
 }
