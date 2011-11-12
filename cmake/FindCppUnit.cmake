@@ -14,6 +14,7 @@
 # mode.
 
 FIND_PATH(CppUnit_INCLUDE_DIR cppunit/TestCase.h
+    "$ENV{HOME}/Projects/libraries/cppunit/include"
     /usr/local/include
     /usr/include
 )

@@ -1,8 +1,8 @@
 #include "PositionComponent.h"
 
 PositionComponent::PositionComponent() :
-    xPos(0.0d),
-    yPos(0.0d)
+    xPos(0.0),
+    yPos(0.0)
 {
 }
 

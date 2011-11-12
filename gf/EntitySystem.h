@@ -21,8 +21,8 @@ namespace gf {
         
         // Callbacks - must be reentrant and threadsafe
         // Called by the EntityManager after the system has been registered
-        virtual void added(EntityPtr entity) {}
-        virtual void removed(EntityPtr entity) {}
+        virtual void added(ConstEntityPtr entity) {}
+        virtual void removed(ConstEntityPtr entity) {}
         
         virtual void receive(MessagePtr message) {}
         

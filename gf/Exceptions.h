@@ -22,6 +22,7 @@ namespace gf {
         
     private:
         std::string message;
+
     };
     
     class EntityNotFoundException : public GameFrameException {
@@ -33,6 +34,19 @@ namespace gf {
         
     private:
         EntityId entId;
+
+    };
+
+    class EntitySetNotCachedException : public GameFrameException {
+    public:
+        EntitySetNotCachedException(const ComponentTypes& t) throw();
+        ~EntitySetNotCachedException() throw();
+
+        ComponentTypes types() const throw();
+
+    private:
+        ComponentTypes cTypes;
+
     };
     
 }

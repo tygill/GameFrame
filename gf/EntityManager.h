@@ -33,6 +33,12 @@ namespace gf {
         template<class T> Entities getEntities() const;
         Entities getEntities(ComponentType type) const;
         Entities getEntities(const ComponentTypes& types) const;
+
+        // One of these functions must be called before getEntities() will return the set of entities with these components.
+        // Also note that this must be called at initialization time, before any entities have been created.
+        template<class T> void registerEntityCache();
+        void registerEntityCache(ComponentType type);
+        void registerEntityCache(const ComponentTypes& types);
         
         /*
         template<class T> ConstEntityPtrs getEntities() const;
@@ -43,6 +49,10 @@ namespace gf {
         void registerSystem(EntitySystem* system, ComponentType type);
         void registerSystem(EntitySystem* system, const ComponentTypes& types);
         
+        // DEBUG
+        void print();
+        class EntityComponentTree;
+
     private:
         // Mutable Entity access is internal only
         EntityPtr getEntity(EntityId entId);
@@ -56,7 +66,7 @@ namespace gf {
     
         // Set up the EntityComponentTree and Entity classes as other files.
         // Then figure out what this needs to have as member variables.
-        class EntityComponentTree;
+        //class EntityComponentTree;
         boost::scoped_ptr<EntityComponentTree> components;
         
         EntityMap entities;
@@ -73,24 +83,34 @@ namespace gf {
         
         // Entity retreval
         ConstEntityPtrs getEntities(ComponentType type) const;
-        ConstEntityPtrs getEntities(const OrderedComponentTypes& types) const;
+        ConstEntityPtrs getEntities(const EntityManager::OrderedComponentTypes& types) const;
+
+        void registerEntityCache(ComponentType type);
+        void registerEntityCache(const EntityManager::OrderedComponentTypes& types);
         
         // Todo: Fix component caching (cache on two factors - add and remove)
         // Component caching management
+        void addEntity(ConstEntityPtr entity);
         void addComponent(ConstEntityPtr entity, ComponentType type);
         void removeComponent(ConstEntityPtr entity, ComponentType type);
         //void cacheComponents(ConstEntityPtr entity);
         void removeEntity(ConstEntityPtr entity);
         
         void registerSystem(EntitySystem* system, ComponentType type);
-        void registerSystem(EntitySystem* system, const OrderedComponentTypes& types);
+        void registerSystem(EntitySystem* system, const EntityManager::OrderedComponentTypes& types);
         
-    private:
+        // DEBUG
+        void print();
         class EntityComponentTreeNode;
+
+    private:
+        //class EntityComponentTreeNode;
         typedef EntityComponentTreeNode* Node;
         
-        void addComponent(ConstEntityPtr entity, ComponentType type, OrderedComponentTypes& types, Node node);
-        void removeComponent(ConstEntityPtr entity, ComponentType type, OrderedComponentTypes& types, Node node);
+        void addComponent(ConstEntityPtr entity, ComponentType type, const EntityManager::OrderedComponentTypes& types, Node node);
+        void cascadeAddComponent(ConstEntityPtr entity, ComponentType type, const EntityManager::OrderedComponentTypes& types, Node node);
+        void removeComponent(ConstEntityPtr entity, ComponentType type, const EntityManager::OrderedComponentTypes& types, Node node);
+        void cascadeRemoveComponent(ConstEntityPtr entity, ComponentType type, const EntityManager::OrderedComponentTypes& types, Node node);
         //void cacheComponents(ConstEntityPtr, OrderedComponentTypes& types, Node node);
         void removeEntity(ConstEntityPtr entity, Node node);
         
@@ -117,8 +137,11 @@ namespace gf {
         // Next node access
         // This encapsilates the system of adding an empty node when the deepest
         // part of the tree is reached
-        Node getNext(ComponentType type, bool allowCreate = false);
+        EntityManager::EntityComponentTree::Node getNext(ComponentType type, bool allowCreate = false);
         
+        // DEBUG
+        friend std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node);
+
     private:
         friend class EntityManager::EntityComponentTree;
         typedef boost::unordered_map<ComponentType, boost::shared_ptr<EntityComponentTreeNode> > NextNodes;
@@ -126,10 +149,13 @@ namespace gf {
         
     private:
         ConstEntityPtrs entities;
-        boost::unordered_set<EntitySystem*> callbacks;
+        typedef boost::unordered_set<EntitySystem*> WeakEntitySystems;
+        WeakEntitySystems callbacks;
         NextNodes nextNodes;
         
     };
+    // DEBUG
+    std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node);
     
     // Template functions for EntityManager
     // ------------------------------------
@@ -137,7 +163,9 @@ namespace gf {
 	template<class T> boost::shared_ptr<T> EntityManager::addComponent(EntityId entId) {
         EntityPtr entity = getEntity(entId);
         if (entity) {
-            return entity->addComponent<T>();
+            boost::shared_ptr<T> ret = entity->addComponent<T>();
+            components->addComponent(entity, componentType<T>());
+            return ret;
         } else {
             return boost::shared_ptr<T>();
         }
@@ -164,7 +192,9 @@ namespace gf {
     template<class T> bool EntityManager::removeComponent(EntityId entId) {
         EntityPtr entity = getEntity(entId);
         if (entity) {
-            return entity->removeComponent<T>();
+            bool ret = entity->removeComponent<T>();
+            components->removeComponent(entity, componentType<T>());
+            return ret;
         } else {
             return false;
         }
@@ -173,12 +203,10 @@ namespace gf {
     template<class T> Entities EntityManager::getEntities() const {
         return getEntities(componentType<T>());
     }
-    
-    /*
-    template<class T> ConstEntityPtrs EntityManager::getEntities() const {
-        return getEntities(componentType<T>());
+
+    template<class T> void EntityManager::registerEntityCache() {
+        registerEntityCache(componentType<T>());
     }
-    */
     
 }
 

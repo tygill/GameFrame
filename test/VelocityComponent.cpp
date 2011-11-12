@@ -1,8 +1,8 @@
 #include "VelocityComponent.h"
 
 VelocityComponent::VelocityComponent() :
-    speed(0.0d),
-    angle(0.0d)
+    speed(0.0),
+    angle(0.0)
 {
 }
 

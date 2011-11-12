@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-#project(GAMEFRAME)
 
 # Directory:
 # GameFrame/test
@@ -7,33 +6,40 @@ cmake_minimum_required(VERSION 2.8)
 
 # Test/example game
 
-include_directories(${GAMEFRAME_SOURCE_DIR})
-include_directories(${GAMEFRAME_SOURCE_DIR}/test)
-#link_directories (${GAMEFRAME_BINARY_DIR})
+include_directories(${GameFrame_SOURCE_DIR}/test)
+#link_directories (${GameFrame_BINARY_DIR})
 
 
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system chrono thread)
-if (NOT Boost_FOUND)
-    message(FATAL_ERROR "Boost was not found")
-endif (NOT Boost_FOUND)
-
+# Include CppUnit
 find_package(CppUnit REQUIRED)
 if (NOT CppUnit_FOUND)
     message(FATAL_ERROR "CppUnit was not found")
 endif (NOT CppUnit_FOUND)
+include_directories("${CppUnit_INCLUDE_DIR}")
 
-set(GAMEFRAME_TEST_CXX
+set(GameFrame_TEST_CXX
     "main.cpp"
     "PositionComponent.cpp"
     "VelocityComponent.cpp"
     "EntityManagerTest.cpp"
+    "TestSystem.cpp"
+    #"DummyComponent.cpp"
 )
 
-add_executable(test ${GAMEFRAME_TEST_CXX})
-target_link_libraries(test GameFrame ${Boost_LIBRARIES} ${CppUnit_LIBRARIES})
+file(GLOB_RECURSE GameFrame_TEST_H "*.h")
 
-add_custom_command(TARGET test POST_BUILD COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test)
+add_executable(test ${GameFrame_TEST_CXX} ${GameFrame_TEST_H})
+target_link_libraries(test GameFrame ${Boost_LIBRARIES})
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_libraries(test ${CppUnit_DEBUG_LIBRARIES})
+else (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    #message(FATAL_ERROR "Not building release versions! -${CMAKE_BUILD_TYPE} -${CppUnit_DEBUG_LIBRARIES} -${CppUnit_LIBRARIES}")
+    target_link_libraries(test ${CppUnit_LIBRARIES})
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+if (UNIX)
+    add_custom_command(TARGET test POST_BUILD COMMAND ${EXECUTABLE_OUTPUT_PATH}/test)
+elseif (WIN32)
+    add_custom_command(TARGET test POST_BUILD COMMAND "${EXECUTABLE_OUTPUT_PATH}/${CMAKE_BUILD_TYPE}/test.exe")
+endif (UNIX)
 

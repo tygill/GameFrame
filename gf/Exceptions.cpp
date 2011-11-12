@@ -25,6 +25,9 @@ namespace gf {
         message = msg;
     }
     
+    // EntityNotFoundException
+    // -----------------------
+
     EntityNotFoundException::EntityNotFoundException(EntityId desiredId) throw() :
         entId(desiredId)
     {
@@ -40,4 +43,20 @@ namespace gf {
         return entId;
     }
     
+    // EntitySetNotCachedException
+    // ---------------------------
+
+    EntitySetNotCachedException::EntitySetNotCachedException(const ComponentTypes& t) throw() :
+        GameFrameException("The set of entities requested was not registered to be cached."),
+        cTypes(t.begin(), t.end())
+    {
+    }
+
+    EntitySetNotCachedException::~EntitySetNotCachedException() throw() {
+    }
+
+    ComponentTypes EntitySetNotCachedException::types() const throw() {
+        return cTypes;
+    }
+
 }

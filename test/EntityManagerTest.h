@@ -13,33 +13,29 @@ public:
     void tearDown();
 
     CPPUNIT_TEST_SUITE(EntityManagerTest);
-    // Some tests are run in a way that they are order
-    // dependent.
     
     // Test creating and destroying an individual
     // entity
-    /*CPPUNIT_TEST(entityCreate);
-    CPPUNIT_TEST(entityExists);
-    CPPUNIT_TEST(entityDestroy);*/
     CPPUNIT_TEST(entity);
     
     // Test adding and removing a single component to a
     // single entity
-    /*CPPUNIT_TEST(addComponent);
-    CPPUNIT_TEST(hasComponent);
-    CPPUNIT_TEST(getComponent);
-    CPPUNIT_TEST(removeComponent);*/
     CPPUNIT_TEST(component);
     
     // Test getting the Entity object and accessing
     // components through it
     CPPUNIT_TEST(getEntity);
     
+    // Test entity cache registration, and verify that
+    // getEntities of non-registered entities throws an
+    // exception
+    CPPUNIT_TEST(registerEntityCache);
+    
     // Test the multiple variations on getting entities
     // based on their sets of components
     CPPUNIT_TEST(getEntities);
-    
-    // TODO: Test system callbacks
+
+    // Test system callbacks
     CPPUNIT_TEST(registerSystem);
     
     // TODO: Test EntityTemplate creation
@@ -47,19 +43,14 @@ public:
     
     CPPUNIT_TEST_SUITE_END();
     
-    /*void entityCreate();
-    void entityExists();
-    void entityDestroy();*/
     void entity();
     
-    /*void addComponent();
-    void hasComponent();
-    void getComponent();
-    void removeComponent();*/
     void component();
     
     void getEntity();
     
+    void registerEntityCache();
+
     void getEntities();
     
     void registerSystem();

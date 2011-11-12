@@ -1,5 +1,6 @@
 #include "gf/EntityManager.h"
 #include "gf/EntityTemplate.h"
+#include "gf/EntitySystem.h"
 
 namespace gf {
 
@@ -16,22 +17,12 @@ namespace gf {
 	EntityId EntityManager::create() {
 	    EntityPtr entity(new Entity());
         entities.insert(std::make_pair(entity->id(), entity));
+        components->addEntity(entity);
         return entity->id();
-		/*
-        EntityId entId = nextId;
-	    EntityPtr entity(new Entity());
-	    bool success = entities.insert(std::make_pair(entId, entity)).second;
-	    while (!success) {
-	        entId++;
-	        success = entities.insert(std::make_pair(entId, entity)).second;
-	    }
-        entity->setId(entId);
-	    nextId = entId + 1;
-	    return entId;
-        */
 	}
 
 	EntityId EntityManager::create(EntityTemplate* form) {
+        // The templates create call must call the standard create() function!!
 		return form->create(this);
 	}
 
@@ -40,7 +31,13 @@ namespace gf {
 	}
 
 	bool EntityManager::destroy(EntityId entId) {
-		return entities.erase(entId) > 0;
+        EntityMap::iterator pos = entities.find(entId);
+        if (pos != entities.end()) {
+            components->removeEntity(pos->second);
+            return entities.erase(entId) > 0;
+        } else {
+            return false;
+        }
 	}
     
     Entity EntityManager::entity(EntityId entId) const {
@@ -70,17 +67,15 @@ namespace gf {
         }
         return ents;
     }
-    
-    /*
-    ConstEntityPtrs EntityManager::getEntities(ComponentType type) const {
-        return components->getEntities(type);
+
+    void EntityManager::registerEntityCache(ComponentType type) {
+        components->registerEntityCache(type);
     }
-    
-    ConstEntityPtrs EntityManager::getEntities(const ComponentTypes& types) const {
+
+    void EntityManager::registerEntityCache(const ComponentTypes& types) {
         OrderedComponentTypes orderedTypes(types.begin(), types.end());
-        return components->getEntities(orderedTypes);
+        components->registerEntityCache(orderedTypes);
     }
-    */
     
     void EntityManager::registerSystem(EntitySystem* system, ComponentType type) {
         components->registerSystem(system, type);
@@ -89,6 +84,11 @@ namespace gf {
     void EntityManager::registerSystem(EntitySystem* system, const ComponentTypes& types) {
         OrderedComponentTypes orderedTypes(types.begin(), types.end());
         components->registerSystem(system, orderedTypes);
+    }
+
+    // DEBUG
+    void EntityManager::print() {
+        components->print();
     }
     
     EntityPtr EntityManager::getEntity(EntityId entId) {
@@ -131,7 +131,10 @@ namespace gf {
         if (node) {
             return node->getEntities();
         } else {
-            return ConstEntityPtrs();
+            ComponentTypes types;
+            types.insert(type);
+            throw EntitySetNotCachedException(types);
+            //return ConstEntityPtrs();
         }
     }
     
@@ -141,43 +144,47 @@ namespace gf {
         // Iterate down the tree
         for (OrderedComponentTypes::const_iterator itr = types.begin(); itr != types.end(); itr++) {
             node = node->getNext(*itr);
-            if (node) {
+            if (!node) {
                 // If we can't go deep enough in the tree to find all the component types,
                 // then bail out, as there are no entities
-                return ConstEntityPtrs();
+                throw EntitySetNotCachedException(ComponentTypes(types.begin(), types.end()));
+                //return ConstEntityPtrs();
             }
         }
         return node->getEntities();
     }
+
+    void EntityManager::EntityComponentTree::registerEntityCache(ComponentType type) {
+        // This will create the next node if it can
+        root->getNext(type, true);
+    }
+
+    void EntityManager::EntityComponentTree::registerEntityCache(const EntityManager::OrderedComponentTypes& types) {
+        Node node = root.get();
+        
+        // Iterate through the tree, adding nodes as needed.
+        for (OrderedComponentTypes::const_iterator itr = types.begin(); itr != types.end(); itr++) {
+            node = node->getNext(*itr, true);
+        }
+    }
+
+    void EntityManager::EntityComponentTree::addEntity(ConstEntityPtr entity) {
+        root->addEntity(entity);
+    }
     
     void EntityManager::EntityComponentTree::addComponent(ConstEntityPtr entity, ComponentType type) {
-        // Build the ordered types that would be affected in the tree by adding
-        // this type
-        ComponentTypes unordered(entity->types());
-        OrderedComponentTypes types;
-        for (ComponentTypes::const_iterator itr = unordered.begin(); itr != unordered.end() && *itr < type; itr++) {
-            types.insert(*itr);
-        }
+        // Build the ordered types that would be affected in the tree by adding this type
+        ComponentTypes unordered(entity->types()); // 'type' will already be part of the set
+        OrderedComponentTypes types(unordered.begin(), unordered.end());
         addComponent(entity, type, types, root.get());
     }
     
     void EntityManager::EntityComponentTree::removeComponent(ConstEntityPtr entity, ComponentType type) {
-        // Build the ordered types that would be affected in the tree by adding
-        // this type
-        ComponentTypes unordered(entity->types());
-        OrderedComponentTypes types;
-        for (ComponentTypes::const_iterator itr = unordered.begin(); itr != unordered.end() && *itr < type; itr++) {
-            types.insert(*itr);
-        }
+        // Build the ordered types that would be affected in the tree by adding this type
+        ComponentTypes unordered(entity->types()); // 'type' will already be removed from the set
+        OrderedComponentTypes types(unordered.begin(), unordered.end());
         removeComponent(entity, type, types, root.get());
     }
-    
-    /*
-    void EntityManager::EntityComponentTree::cacheComponents(ConstEntityPtr entity) {
-        OrderedComponentTypes ordered(entity->types().begin(), entity->types().end());
-        cacheComponents(entity, ordered, root);
-    }
-    */
     
     void EntityManager::EntityComponentTree::removeEntity(ConstEntityPtr entity) {
         removeEntity(entity, root.get());
@@ -196,31 +203,55 @@ namespace gf {
         }
         node->addSystem(system);
     }
+
+    // DEBUG
+    void EntityManager::EntityComponentTree::print() {
+        std::cout << *root.get() << std::endl;
+    }
     
-    void EntityManager::EntityComponentTree::addComponent(ConstEntityPtr entity, ComponentType type, OrderedComponentTypes& types, EntityManager::EntityComponentTree::Node node) {
+    void EntityManager::EntityComponentTree::addComponent(ConstEntityPtr entity, ComponentType type, const OrderedComponentTypes& types, EntityManager::EntityComponentTree::Node node) {
         if (node) {
             if (node->hasEntity(entity)) {
-                node->getNext(type, true)->addEntity(entity);
-                OrderedComponentTypes typesCopy(types);
-                for (OrderedComponentTypes::const_iterator itr = typesCopy.begin(); itr != typesCopy.end(); itr++) {
-                    types.erase(*itr);
-                    addComponent(entity, type, types, node->getNext(*itr));
-                    types.insert(*itr);
+                cascadeAddComponent(entity, type, types, node->getNext(type));
+                for (OrderedComponentTypes::iterator itr = types.begin(); itr != types.end() && *itr < type; itr++) {
+                    Node next = node->getNext(*itr);
+                    if (next) {
+                        next->addEntity(entity);
+                        addComponent(entity, type, types, next);
+                    }
+                }
+            }
+        }
+    }
+
+    void EntityManager::EntityComponentTree::cascadeAddComponent(ConstEntityPtr entity, ComponentType type, const OrderedComponentTypes& types, EntityManager::EntityComponentTree::Node node) {
+        if (node) {
+            node->addEntity(entity);
+            for (OrderedComponentTypes::reverse_iterator itr = types.rbegin(); itr != types.rend() && *itr > type; itr++) {
+                cascadeAddComponent(entity, type, types, node->getNext(*itr));
+            }
+        }
+    }
+    
+    void EntityManager::EntityComponentTree::removeComponent(ConstEntityPtr entity, ComponentType type, const OrderedComponentTypes& types, EntityManager::EntityComponentTree::Node node) {
+        if (node) {
+            if (node->hasEntity(entity)) {
+                cascadeRemoveComponent(entity, type, types, node->getNext(type));
+                for (OrderedComponentTypes::iterator itr = types.begin(); itr != types.end() && *itr < type; itr++) {
+                    Node next = node->getNext(*itr);
+                    if (next) {
+                        removeComponent(entity, type, types, next);
+                    }
                 }
             }
         }
     }
     
-    void EntityManager::EntityComponentTree::removeComponent(ConstEntityPtr entity, ComponentType type, OrderedComponentTypes& types, EntityManager::EntityComponentTree::Node node) {
+    void EntityManager::EntityComponentTree::cascadeRemoveComponent(ConstEntityPtr entity, ComponentType type, const OrderedComponentTypes& types, EntityManager::EntityComponentTree::Node node) {
         if (node) {
-            if (node->hasEntity(entity)) {
-                node->getNext(type, true)->removeEntity(entity);
-                OrderedComponentTypes typesCopy(types);
-                for (OrderedComponentTypes::const_iterator itr = typesCopy.begin(); itr != typesCopy.end(); itr++) {
-                    types.erase(*itr);
-                    removeComponent(entity, type, types, node->getNext(*itr));
-                    types.insert(*itr);
-                }
+            node->removeEntity(entity);
+            for (OrderedComponentTypes::reverse_iterator itr = types.rbegin(); itr != types.rend() && *itr > type; itr++) {
+                cascadeRemoveComponent(entity, type, types, node->getNext(*itr));
             }
         }
     }
@@ -259,7 +290,12 @@ namespace gf {
     // -----------------------------------------------------------
     
     void EntityManager::EntityComponentTree::EntityComponentTreeNode::addEntity(ConstEntityPtr entity) {
-        entities.insert(entity);
+        bool success = entities.insert(entity).second;
+        if (success) {
+            for (WeakEntitySystems::iterator itr = callbacks.begin(); itr != callbacks.end(); itr++) {
+                (*itr)->added(entity);
+            }
+        }
     }
     
     bool EntityManager::EntityComponentTree::EntityComponentTreeNode::hasEntity(ConstEntityPtr entity) {
@@ -267,7 +303,13 @@ namespace gf {
     }
     
     bool EntityManager::EntityComponentTree::EntityComponentTreeNode::removeEntity(ConstEntityPtr entity) {
-        return entities.erase(entity) > 0;
+        bool success = entities.erase(entity) > 0;
+        if (success) {
+            for (WeakEntitySystems::iterator itr = callbacks.begin(); itr != callbacks.end(); itr++) {
+                (*itr)->added(entity);
+            }
+        }
+        return success;
     }
     
     ConstEntityPtrs EntityManager::EntityComponentTree::EntityComponentTreeNode::getEntities() const {
@@ -299,6 +341,29 @@ namespace gf {
     
     EntityManager::EntityComponentTree::EntityComponentTreeNode::NextNodes EntityManager::EntityComponentTree::EntityComponentTreeNode::getChildren() const {
         return nextNodes;
+    }
+
+    std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node) {
+        out << "{\n[";
+        bool first = true;
+        for (ConstEntityPtrs::const_iterator itr = node.entities.begin(); itr != node.entities.end(); itr++) {
+            if (!first) {
+                out << ",";
+            }
+            first = false;
+            out << (*itr)->id();
+        }
+        out << "],\n";
+        first = true;
+        for (EntityManager::EntityComponentTree::EntityComponentTreeNode::NextNodes::const_iterator itr = node.nextNodes.begin(); itr != node.nextNodes.end(); itr++) {
+            if (!first) {
+                out << ",\n";
+            }
+            first = false;
+            out << itr->first.name() << ":" << *itr->second.get();
+        }
+        out << "\n}";
+        return out;
     }
     
 }
