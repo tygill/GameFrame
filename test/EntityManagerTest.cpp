@@ -4,6 +4,7 @@
 #include "PositionComponent.h"
 #include "VelocityComponent.h"
 #include "DummyComponent.h"
+#include "TestEntityTemplate.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(EntityManagerTest);
 
@@ -351,4 +352,48 @@ void EntityManagerTest::registerSystem() {
 }
 
 void EntityManagerTest::createFromTemplate() {
+    // Setup
+    
+    gf::ComponentTypes types;
+    types.insert(gf::componentType<PositionComponent>());
+    types.insert(gf::componentType<VelocityComponent>());
+
+    // Preassumptions
+    CPPUNIT_ASSERT(entities.getEntities(types).size() == 0);
+
+    boost::scoped_ptr<gf::EntityTemplate> temp(new TestEntityTemplate());
+
+    gf::EntityId ent = entities.create(temp.get());
+    gf::EntityId ent2 = entities.create(temp.get());
+    gf::EntityId entbase = entities.create();
+    entities.addComponent<PositionComponent>(entbase);
+    entities.addComponent<VelocityComponent>(entbase);
+
+    CPPUNIT_ASSERT(entities.getEntities(types).size() == 3);
+
+    gf::Entity enti = entities.entity(ent);
+    gf::Entity enti2 = entities.entity(ent2);
+    gf::Entity entibase = entities.entity(entbase);
+    
+    // Verify that the templates format was applied to the new entities
+    CPPUNIT_ASSERT(enti.getComponent<PositionComponent>()->x() == 10);
+    CPPUNIT_ASSERT(enti.getComponent<PositionComponent>()->y() == 10);
+    CPPUNIT_ASSERT(enti.getComponent<VelocityComponent>()->direction() == 2);
+    CPPUNIT_ASSERT(enti.getComponent<VelocityComponent>()->velocity() == 5);
+    
+    CPPUNIT_ASSERT(enti2.getComponent<PositionComponent>()->x() == 10);
+    CPPUNIT_ASSERT(enti2.getComponent<PositionComponent>()->y() == 10);
+    CPPUNIT_ASSERT(enti2.getComponent<VelocityComponent>()->direction() == 2);
+    CPPUNIT_ASSERT(enti2.getComponent<VelocityComponent>()->velocity() == 5);
+    
+    // Verify that the base case was not the same as the template case
+    CPPUNIT_ASSERT(entibase.getComponent<PositionComponent>()->x() != 10);
+    CPPUNIT_ASSERT(entibase.getComponent<PositionComponent>()->y() != 10);
+    CPPUNIT_ASSERT(entibase.getComponent<VelocityComponent>()->direction() != 2);
+    CPPUNIT_ASSERT(entibase.getComponent<VelocityComponent>()->velocity() != 5);
+
+    // Clean up
+    entities.destroy(ent);
+    entities.destroy(ent2);
+    entities.destroy(entbase);
 }

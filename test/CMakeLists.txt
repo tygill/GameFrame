@@ -21,9 +21,13 @@ set(GameFrame_TEST_CXX
     "main.cpp"
     "PositionComponent.cpp"
     "VelocityComponent.cpp"
-    "EntityManagerTest.cpp"
     "TestSystem.cpp"
     #"DummyComponent.cpp"
+    #"DummyMessage.cpp"
+    #"EmptyMessage.cpp"
+    "TestEntityTemplate.cpp"
+    "EntityManagerTest.cpp"
+    "MessageManagerTest.cpp"
 )
 
 file(GLOB_RECURSE GameFrame_TEST_H "*.h")
