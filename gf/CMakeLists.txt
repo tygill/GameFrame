@@ -20,6 +20,7 @@ set(GameFrame_CORE_LIB_CXX
     "EntityTemplate.cpp"
     "Exceptions.cpp"
     "GameFrame.cpp"
+    "Global.cpp"
     "Message.cpp"
     "MessageManager.cpp"
     "Resource.cpp"

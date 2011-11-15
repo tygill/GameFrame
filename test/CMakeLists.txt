@@ -19,15 +19,21 @@ include_directories("${CppUnit_INCLUDE_DIR}")
 
 set(GameFrame_TEST_CXX
     "main.cpp"
+    # The test implementations of various components, messages, objects, etc.
     "PositionComponent.cpp"
     "VelocityComponent.cpp"
     "TestSystem.cpp"
-    #"DummyComponent.cpp"
-    #"DummyMessage.cpp"
-    #"EmptyMessage.cpp"
+    "DummyComponent.cpp"
+    "DummyMessage.cpp"
+    "EmptyMessage.cpp"
+    "DummyResource.cpp"
+    "DummyResourceTemplate.cpp"
+    
+    # The test drivers
     "TestEntityTemplate.cpp"
     "EntityManagerTest.cpp"
     "MessageManagerTest.cpp"
+    "ResourceManagerTest.cpp"
 )
 
 file(GLOB_RECURSE GameFrame_TEST_H "*.h")

@@ -2,8 +2,8 @@
 
 namespace gf {
     
-    //MessageType Message::type() const {
-    //    return MessageType(typeid(this));
-    //}
+    MessageType Message::type() const {
+        return MessageType(typeid(*this));
+    }
     
 }

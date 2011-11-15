@@ -9,7 +9,7 @@ namespace gf {
     class Resource {
     public:
         Resource() {}
-        ~Resource() {}
+        virtual ~Resource() {}
         
         ResourceType type() const;
         //template<class T> static ResourceType getType();

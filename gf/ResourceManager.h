@@ -16,7 +16,7 @@ namespace gf {
         template<class T> ResourceId define(boost::shared_ptr<ResourceTemplate> form);
         
         template<class T> bool isLoaded(ResourceId resId) const;
-        // Get will load the resource on the fly if it is not presently loaded, but will not modify
+        // THIS STYLE WAS ABANDONED! See 4 lines down...Get will load the resource on the fly if it is not presently loaded, but will not modify
         // the use count.
         // REMEMBER THIS!! Things may need to be modified to make sure this works right
         // (Though I guess this could just return a null pointer if its unloaded)
@@ -28,7 +28,7 @@ namespace gf {
         // from memory when needed.
         // It is possible though that unload will only be marked immediately, and might not
         // be completed until later, in a separate thread for instance.
-        template<class T> boost::shared_ptr<T const> load(ResourceId resId);
+        template<class T> void load(ResourceId resId);
         template<class T> void unload(ResourceId resId);
         // Preloading will be managed by an independent system, as all it has to do is listen
         // for entities with a new PreloadComponent, and then extract the ResourceType/ResourceId
@@ -41,7 +41,7 @@ namespace gf {
         // Or at least most of them. These functions are provided so that things like preloaders
         // can preload arbitrary ResourceTypes without compile time knowledge of them.
         // Getting them requires using a templated function though.
-        ResourceId define(ResourceType type, boost::shared_ptr<ResourceTemplate> form);
+        ResourceId define(ResourceType type, ResourceTemplatePtr form);
         bool isLoaded(ResourceType type, ResourceId resId) const;
         void load(ResourceType type, ResourceId resId);
         void unload(ResourceType type, ResourceId resId);
@@ -63,7 +63,7 @@ namespace gf {
         ResourceTypeManager();
         ~ResourceTypeManager();
         
-        ResourceId define(boost::shared_ptr<ResourceTemplate> form);
+        ResourceId define(ResourceTemplatePtr form);
         bool isLoaded(ResourceId resId) const;
         ResourcePtr get(ResourceId resId) const;
         void load(ResourceId resId);
@@ -79,7 +79,7 @@ namespace gf {
     
     class ResourceManager::ResourceTypeManager::ResourceMetadata {
     public:
-        ResourceMetadata(boost::shared_ptr<ResourceTemplate> temp);
+        ResourceMetadata(ResourceTemplatePtr temp);
         ~ResourceMetadata();
         
         bool isLoaded() const;
@@ -89,7 +89,7 @@ namespace gf {
         
     private:
         // This stores the template to (re)build the Resource when it is loaded.
-        boost::shared_ptr<ResourceTemplate> form;
+        ResourceTemplatePtr form;
         // Load count (independent from shared_ptr count - this way, if something else is still
         // holding on to the Resource via some pointer somewhere, the program won't crash, but the
         // ResourceManager will simply let go of its copy, so that the moment the other holder of
@@ -110,15 +110,25 @@ namespace gf {
     template<class T> ResourceId ResourceManager::define(boost::shared_ptr<ResourceTemplate> form) {
         return define(resourceType<T>(), form);
     }
-    
-    template<class T> boost::shared_ptr<T const> ResourceManager::get(ResourceId resId) const {
-        // dynamic cast could probably work too, but this is
-        // faster, and should never have issues anyway.
-        return static_cast<boost::shared_ptr<T const> >(get(resourceType<T>(), resId));
+
+    template<class T> bool ResourceManager::isLoaded(ResourceId resId) const {
+        return isLoaded(resourceType<T>(), resId);
     }
     
-    template<class T> boost::shared_ptr<T const> ResourceManager::load(ResourceId resId) {
-        return static_cast<boost::shared_ptr<T const> >(load(resourceType<T>(), resId));
+    template<class T> boost::shared_ptr<T const> ResourceManager::get(ResourceId resId) const {
+        ResourceTypeManager const* manager = getTypeManager(resourceType<T>());
+        if (manager) {
+            // dynamic cast could probably work too, but this is
+            // faster, and should never have issues anyway.
+            return boost::static_pointer_cast<T const>(manager->get(resId));
+        } else {
+            throw ResourceNotFoundException(resourceType<T>(), resId);
+            //return boost::shared_ptr<T const>();
+        }
+    }
+    
+    template<class T> void ResourceManager::load(ResourceId resId) {
+        load(resourceType<T>(), resId);
     }
     
     template<class T> void ResourceManager::unload(ResourceId resId) {

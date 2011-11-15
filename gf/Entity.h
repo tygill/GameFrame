@@ -27,7 +27,7 @@ namespace gf {
         EntityId id() const;
         
     private:
-        typedef boost::unordered_map<ComponentType, boost::shared_ptr<EntityComponent> > ComponentMap;
+        typedef boost::unordered_map<ComponentType, ComponentPtr> ComponentMap;
         
     private:
         ComponentTypes componentTypes;

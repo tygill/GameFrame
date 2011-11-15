@@ -11,7 +11,7 @@ namespace gf {
         Message() {}
         virtual ~Message() {}
         
-        virtual MessageType type() const = 0;
+        virtual MessageType type() const;
         //template<class T> static MessageType getType();
     };
     

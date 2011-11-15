@@ -23,7 +23,19 @@ namespace gf {
         }
     }
     
-    
+    void ResourceManager::load(ResourceType type, ResourceId resId) {
+        ResourceTypeManager* manager = getTypeManager(type);
+        if (manager) {
+            manager->load(resId);
+        }
+    }
+
+    void ResourceManager::unload(ResourceType type, ResourceId resId) {
+        ResourceTypeManager* manager = getTypeManager(type);
+        if (manager) {
+            manager->unload(resId);
+        }
+    }    
     
     ResourceManager::ResourceTypeManager* ResourceManager::getTypeManager(ResourceType type) {
         TypeManagers::iterator pos = types.find(type);
@@ -113,7 +125,7 @@ namespace gf {
     }
     
     bool ResourceManager::ResourceTypeManager::ResourceMetadata::isLoaded() const {
-        return !resource;
+        return !!resource;
     }
     
     ResourcePtr ResourceManager::ResourceTypeManager::ResourceMetadata::get() const {

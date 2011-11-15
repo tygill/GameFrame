@@ -3,7 +3,7 @@
 namespace gf {
     
     ResourceType Resource::type() const {
-        return ResourceType(typeid(this));
+        return ResourceType(typeid(*this));
     }
     
 }

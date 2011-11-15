@@ -48,6 +48,20 @@ namespace gf {
         ComponentTypes cTypes;
 
     };
+
+    class ResourceNotFoundException : public GameFrameException {
+    public:
+        ResourceNotFoundException(ResourceType t, ResourceId i) throw();
+        ~ResourceNotFoundException() throw();
+
+        ResourceType type() const throw();
+        ResourceId id() const throw();
+
+    private:
+        ResourceType resType;
+        ResourceId resId;
+
+    };
     
 }
 

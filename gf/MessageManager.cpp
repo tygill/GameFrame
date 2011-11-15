@@ -12,7 +12,6 @@ namespace gf {
     void MessageManager::send(MessagePtr message) {
         MessageMap::iterator pos = messageMap.find(message->type());
         if (pos != messageMap.end()) {
-            std::cout << "Sending message" << std::endl;
             for (boost::unordered_set<EntitySystem*>::iterator itr = pos->second.begin(); itr != pos->second.end(); itr++) {
                 (*itr)->receive(message);
             }
@@ -27,7 +26,6 @@ namespace gf {
             // We just add it to the set
             pos->second.insert(system);
         } else {
-            std::cout << "Creating new message map set" << std::endl;
             // Create a new EntitySystem*s to put the system in
             std::pair<MessageMap::iterator, bool> messagePair = messageMap.insert(std::make_pair(type, boost::unordered_set<EntitySystem*>()));
             messagePair.first->second.insert(system);

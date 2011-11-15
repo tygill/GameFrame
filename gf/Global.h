@@ -52,7 +52,9 @@ namespace gf {
     
     class GameFrame;
     class Entity;
+    class EntityComponent;
     class Resource;
+    class ResourceTemplate;
     class Message;
     class EntitySystem;
     
@@ -67,9 +69,13 @@ namespace gf {
     typedef boost::shared_ptr<Entity const> ConstEntityPtr;
     typedef boost::unordered_set<ConstEntityPtr> ConstEntityPtrs;
     typedef boost::unordered_set<Entity> Entities;
+
+    typedef boost::shared_ptr<EntityComponent> ComponentPtr;
     
     typedef boost::shared_ptr<Resource> ResourcePtr;
     typedef boost::shared_ptr<Resource const> ConstResourcePtr;
+
+    typedef boost::shared_ptr<ResourceTemplate> ResourceTemplatePtr;
     
     typedef boost::shared_ptr<Message> MessagePtr;
     typedef boost::shared_ptr<Message const> ConstMessagePtr;
@@ -79,15 +85,23 @@ namespace gf {
     template<class T> ComponentType componentType() {
         return ComponentType(typeid(T));
     }
+
+    ComponentType componentType(boost::shared_ptr<EntityComponent> comp);
     
     template<class T> ResourceType resourceType() {
         return ResourceType(typeid(T));
     }
+
+    ResourceType resourceType(ResourcePtr res);
     
     template<class T> MessageType messageType() {
         return MessageType(typeid(T));
     }
+
+    MessageType messageType(MessagePtr mess);
     
 }
+
+#include "gf/Exceptions.h"
 
 #endif // header

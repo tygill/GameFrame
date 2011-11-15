@@ -59,4 +59,23 @@ namespace gf {
         return cTypes;
     }
 
+    // ResourceNotFoundException
+    // -------------------------
+
+    ResourceNotFoundException::ResourceNotFoundException(ResourceType t, ResourceId i) throw() :
+        resType(t),
+        resId(i)
+    {
+    }
+
+    ResourceNotFoundException::~ResourceNotFoundException() throw() {
+    }
+
+    ResourceType ResourceNotFoundException::type() const throw() {
+        return resType;
+    }
+
+    ResourceId ResourceNotFoundException::id() const throw() {
+        return resId;
+    }
 }

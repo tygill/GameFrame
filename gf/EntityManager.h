@@ -4,7 +4,6 @@
 
 #include "gf/Global.h"
 #include "gf/Entity.h"
-#include "gf/Exceptions.h"
 
 namespace gf {
     
