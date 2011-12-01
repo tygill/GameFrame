@@ -3,6 +3,8 @@
 #define idF0A6916A_634B_4B70_9E8A24A1233AC718
 
 #include "gf/Global.h"
+// Causes problems in including.
+//#include "gf/GameFrame.h"
 //#include "gf/EntitySystem.h"
 
 #include <boost/shared_ptr.hpp>
@@ -13,8 +15,8 @@ namespace gf {
     
     class EntitySystemThread {
     public:
-        //EntitySystemThread();
-        //~EntitySystemThread();
+        EntitySystemThread(GameFrame* frame);
+        ~EntitySystemThread();
         
         template<class T> T* addSystem();
         
@@ -25,13 +27,15 @@ namespace gf {
         
     private:
         EntitySystems systems;
+        GameFrame* framework;
+
     };
     
     // Template implementations
     // ------------------------
     
     template<class T> T* EntitySystemThread::addSystem() {
-        boost::shared_ptr<T> system(new T());
+        boost::shared_ptr<T> system(new T(framework));
         systems.insert(system);
         return system.get();
     }

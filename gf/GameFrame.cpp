@@ -3,7 +3,9 @@
 
 namespace gf {
     
-    GameFrame::GameFrame() {
+    GameFrame::GameFrame() :
+        running(false)
+    {
         // Nothing
     }
     
@@ -12,11 +14,30 @@ namespace gf {
     }
     
     int GameFrame::run() {
-    	for (EntitySystemThreads::iterator itr = systemThreads.begin(); itr != systemThreads.end(); itr++) {
-    		threads.create_thread(boost::ref(*(itr->second)));
-    	}
+        running = true;
+        if (systemThreads.size() > 1) {
+            // Grab the second and rest of the threads. The first thread will be run in the main thread for the sake of SDL and other thread dependant things.
+            EntitySystemThreads::iterator itr = systemThreads.begin();
+            itr++;
+    	    for (; itr != systemThreads.end(); itr++) {
+                std::cout << "Creating thread" << std::endl;
+    		    threads.create_thread(boost::ref(*itr->second.get()));
+                std::cout << "Thread created" << std::endl;
+    	    }
+        }
+        if (systemThreads.size() > 0) {
+            systemThreads.begin()->second.get()->operator()();
+        }
         threads.join_all();
         return 0;
+    }
+
+    bool GameFrame::isRunning() const {
+        return running;
+    }
+
+    void GameFrame::stop() {
+        running = false;
     }
 
     EntityManager& GameFrame::entityManager() {

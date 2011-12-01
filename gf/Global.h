@@ -4,6 +4,7 @@
 
 #include <string>
 #include <set>
+#include <map>
 #include <typeindex>
 // It appears that gcc doesn't yet support type_index under standard fedora...
 // In this case, use this and prefix all typeid() calls with &

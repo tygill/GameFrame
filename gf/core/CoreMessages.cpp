@@ -1,0 +1,3 @@
+#include "gf/core/CoreMessages.h"
+
+// Nothing here...

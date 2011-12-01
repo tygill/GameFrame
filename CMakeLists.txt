@@ -15,14 +15,26 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system chrono thread)
+find_package(Boost 1.47 REQUIRED COMPONENTS system chrono thread date_time)
 if (NOT Boost_FOUND)
     message(FATAL_ERROR "Boost was not found")
 endif (NOT Boost_FOUND)
 
+find_package(SDL)
+if (NOT SDL_FOUND)
+    message(FATAL_ERROR "SDL was not found (yes, it isn't necessary for the core framework, but I haven't built this to be that flexible yet. With time. With time.")
+endif (NOT SDL_FOUND)
+
+find_package(SDL_image)
+if (NOT SDLIMAGE_FOUND)
+    message(FATAL_ERROR "SDL_image was not found (yes, it isn't necessary for the core framework, but I haven't built this to be that flexible yet. With time. With time.")
+endif (NOT SDLIMAGE_FOUND)
+
 
 # Global includes
 include_directories("${Boost_INCLUDE_DIRS}")
+include_directories("${SDL_INCLUDE_DIR}")
+include_directories("${SDLIMAGE_INCLUDE_DIR}")
 #include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${GameFrame_SOURCE_DIR}")
 
@@ -40,6 +52,9 @@ add_subdirectory(gf)
 
 # Core library test cases
 add_subdirectory(test)
+
+# Demo application
+add_subdirectory(demo)
 
 
 

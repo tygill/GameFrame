@@ -17,7 +17,7 @@ namespace gf {
         // removed.
         
         // This is where all the new behavior should be .
-        virtual void update(boost::chrono::nanoseconds delta) {}
+        virtual void update(boost::chrono::milliseconds delta) {}
         
         // Callbacks - must be reentrant and threadsafe
         // Called by the EntityManager after the system has been registered
@@ -26,7 +26,7 @@ namespace gf {
         
         virtual void receive(MessagePtr message) {}
         
-    private:
+    protected:
         GameFrame* framework;
     };
     

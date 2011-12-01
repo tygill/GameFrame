@@ -41,25 +41,25 @@ void ResourceManagerTest::createResource() {
     // Test loading both resources one at a time
     
     resources.load<DummyResource>(res);
-    dummy.swap(resources.get<DummyResource>(res));
+    dummy = resources.get<DummyResource>(res);
     CPPUNIT_ASSERT(dummy);
     CPPUNIT_ASSERT(resources.isLoaded<DummyResource>(res));
     CPPUNIT_ASSERT(!resources.isLoaded<DummyResource>(res2));
     
     resources.load<DummyResource>(res2);
-    dummy.swap(resources.get<DummyResource>(res2));
+    dummy = resources.get<DummyResource>(res2);
     CPPUNIT_ASSERT(dummy);
     CPPUNIT_ASSERT(resources.isLoaded<DummyResource>(res));
     CPPUNIT_ASSERT(resources.isLoaded<DummyResource>(res2));
 
     resources.load<DummyResource>(res);
-    dummy.swap(resources.get<DummyResource>(res));
+    dummy = resources.get<DummyResource>(res);
     CPPUNIT_ASSERT(dummy);
     CPPUNIT_ASSERT(resources.isLoaded<DummyResource>(res));
     CPPUNIT_ASSERT(resources.isLoaded<DummyResource>(res2));
 
     resources.load<DummyResource>(res2);
-    dummy.swap(resources.get<DummyResource>(res2));
+    dummy = resources.get<DummyResource>(res2);
     CPPUNIT_ASSERT(dummy);
     CPPUNIT_ASSERT(resources.isLoaded<DummyResource>(res));
     CPPUNIT_ASSERT(resources.isLoaded<DummyResource>(res2));

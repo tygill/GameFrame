@@ -25,20 +25,25 @@ namespace gf {
         // they all stop. This is designed to be the return to main(), so
         // error codes can be returned as ints.
         int run();
+
+        bool isRunning() const;
+        void stop();
         
         EntityManager& entityManager();
         ResourceManager& resourceManager();
         MessageManager& messageManager();
         
     private:
-        typedef boost::ptr_unordered_map<uint8_t, EntitySystemThread> EntitySystemThreads;
+        typedef boost::unordered_map<uint8_t, boost::shared_ptr<EntitySystemThread> > EntitySystemThreads;
         EntitySystemThreads systemThreads;
         
         boost::thread_group threads;
+        bool running;
         
         EntityManager entities;
         ResourceManager resources;
         MessageManager messages;
+
     };
     
     template<class T> T* GameFrame::addSystem(uint8_t thread) {
@@ -46,10 +51,11 @@ namespace gf {
         EntitySystemThreads::iterator pos = systemThreads.find(thread);
     	if (pos == systemThreads.end()) {
             // A new thread should be created
-            std::pair<EntitySystems::iterator, bool> systemPair = systemThreads.insert(std::make_pair(thread, new EntitySystemThread()));
-    		return (*systemPair.first)->addSystem<T>();
+            systemThreads.insert(std::make_pair(thread, new EntitySystemThread(this)));
+            pos = systemThreads.find(thread);
+    		return pos->second->addSystem<T>();
     	} else {
-    		return pos->addSystem<T>();
+    		return pos->second->addSystem<T>();
     	}
     }
 

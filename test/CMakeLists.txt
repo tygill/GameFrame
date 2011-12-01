@@ -36,10 +36,10 @@ set(GameFrame_TEST_CXX
     "ResourceManagerTest.cpp"
 )
 
-file(GLOB_RECURSE GameFrame_TEST_H "*.h")
+file(GLOB GameFrame_TEST_H "*.h")
 
 add_executable(test ${GameFrame_TEST_CXX} ${GameFrame_TEST_H})
-target_link_libraries(test GameFrame ${Boost_LIBRARIES})
+target_link_libraries(test GameFrame ${GameFrame_EXTRA_LIBS} ${Boost_LIBRARIES})
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_libraries(test ${CppUnit_DEBUG_LIBRARIES})
 else (CMAKE_BUILD_TYPE STREQUAL "Debug")
