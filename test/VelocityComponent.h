@@ -7,6 +7,8 @@
 class VelocityComponent : public gf::EntityComponent {
 public:
     VelocityComponent();
+
+    GF_DECLARE_COMPONENT;
     
     double velocity() const;
     void setVelocity(double vel);

@@ -5,6 +5,8 @@
 #include <string>
 #include <set>
 #include <map>
+// RTTI is being phased out as the provider of message and component type information.
+// Static registration is replacing it.
 #include <typeindex>
 // It appears that gcc doesn't yet support type_index under standard fedora...
 // In this case, use this and prefix all typeid() calls with &
@@ -32,7 +34,8 @@ namespace gf {
     typedef uint32_t EntityId;
     typedef boost::unordered_set<EntityId> EntityIds;
     
-    typedef std::type_index ComponentType;
+    typedef uint32_t ComponentType;
+//    typedef std::type_index ComponentType;
 //    typedef std::type_info* ComponentType;
     // For the caching system, a standard set will be used so traversal will
     // be properly ordered
@@ -40,12 +43,12 @@ namespace gf {
     
     typedef uint32_t ResourceId;
     typedef boost::unordered_set<ResourceId> ResourceIds;
-    typedef std::type_index ResourceType;
+    typedef uint32_t ResourceType;
+//    typedef std::type_index ResourceType;
 //    typedef std::type_info* ResourceType;
     typedef boost::unordered_set<ResourceType> ResourceTypes;
     
-    typedef std::type_index MessageType;
-//    typedef std::type_info* MessageType;
+    typedef uint32_t MessageType;
     
     // -------
     // Classes
@@ -84,22 +87,16 @@ namespace gf {
     typedef boost::unordered_set<boost::shared_ptr<EntitySystem> > EntitySystems;
     
     template<class T> ComponentType componentType() {
-        return ComponentType(typeid(T));
+        return T::staticType();
     }
-
-    ComponentType componentType(boost::shared_ptr<EntityComponent> comp);
     
     template<class T> ResourceType resourceType() {
-        return ResourceType(typeid(T));
+        return T::staticType();
     }
 
-    ResourceType resourceType(ResourcePtr res);
-    
     template<class T> MessageType messageType() {
-        return MessageType(typeid(T));
+        return T::staticType();
     }
-
-    MessageType messageType(MessagePtr mess);
     
 }
 

@@ -5,9 +5,7 @@
 #include <gf/EntityComponent.h>
 
 class DummyComponent : public gf::EntityComponent {
-public:
-    DummyComponent() {}
-    ~DummyComponent() {}
+    GF_DECLARE_COMPONENT;
 };
 
 #endif // header

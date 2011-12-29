@@ -2,7 +2,7 @@
 #include "gf/EntitySystem.h"
 
 namespace gf {
-    
+
     MessageManager::MessageManager() {
     }
     

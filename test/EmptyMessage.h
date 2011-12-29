@@ -9,7 +9,7 @@ public:
     EmptyMessage() {}
     ~EmptyMessage() {}
 
-    //gf::MessageType type() const {return gf::messageType<EmptyMessage>();}
+    GF_DECLARE_MESSAGE;
 
 };
 

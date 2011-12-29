@@ -24,6 +24,13 @@ namespace gf {
         std::string message;
 
     };
+
+    class MethodNotDefinedException : public GameFrameException {
+    public:
+        MethodNotDefinedException(const std::string& msg) throw();
+        ~MethodNotDefinedException();
+        
+    };
     
     class EntityNotFoundException : public GameFrameException {
     public:

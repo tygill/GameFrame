@@ -34,9 +34,6 @@ set(GameFrame_LIB_CXX
 file(GLOB GameFrame_LIB_H "*.h")
 file(GLOB GameFrame_CORE_LIB_H "core/*.h")
 
-add_library(GameFrame ${GameFrame_LIB_CXX} ${GameFrame_LIB_H} ${GameFrame_CORE_LIB_H})
-#find_library(GameFrame_LIBRARY GameFrame ${LIBRARY_OUTPUT_PATH})
-
 # Global linkage libraries
 
 if (UNIX)
@@ -47,13 +44,6 @@ set(GameFrame_EXTRA_LIBS
     FILEPATH
     "Full paths to all dependent libraries for GameFrame"
 )
-set(GameFrame_LIBS
-    ${GameFrame}
-    ${GameFrame_EXTRA_LIBS}
-    CACHE
-    FILEPATH
-    "Full path to all GameFrame libraries."
-)
 elseif (WIN32)
 set(GameFrame_EXTRA_LIBS
     ${Boost_LIBRARIES}
@@ -61,6 +51,10 @@ set(GameFrame_EXTRA_LIBS
     FILEPATH
     "Full paths to all dependent libraries for GameFrame"
 )
+endif (UNIX)
+
+if(CMAKE_BUILD_TYPE STREQUAL Release)
+add_library(GameFrame ${GameFrame_LIB_CXX} ${GameFrame_LIB_H} ${GameFrame_CORE_LIB_H})
 set(GameFrame_LIBS
     ${GameFrame}
     ${GameFrame_EXTRA_LIBS}
@@ -68,8 +62,19 @@ set(GameFrame_LIBS
     FILEPATH
     "Full path to all GameFrame libraries."
 )
-endif (UNIX)
+endif(CMAKE_BUILD_TYPE STREQUAL Release)
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+add_library(GameFramed ${GameFrame_LIB_CXX} ${GameFrame_LIB_H} ${GameFrame_CORE_LIB_H})
+set(GameFramed_LIBS
+    ${GameFramed}
+    ${GameFrame_EXTRA_LIBS}
+    CACHE
+    FILEPATH
+    "Full path to all GameFrame debug libraries."
+)
+endif(CMAKE_BUILD_TYPE STREQUAL Debug)
 
+#find_library(GameFrame_LIBRARY GameFrame ${LIBRARY_OUTPUT_PATH})
 
 # Add the core component libraries
 add_subdirectory(core)

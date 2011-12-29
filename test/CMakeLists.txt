@@ -39,13 +39,27 @@ set(GameFrame_TEST_CXX
 file(GLOB GameFrame_TEST_H "*.h")
 
 add_executable(test ${GameFrame_TEST_CXX} ${GameFrame_TEST_H})
-target_link_libraries(test GameFrame ${GameFrame_EXTRA_LIBS} ${Boost_LIBRARIES})
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(test ${CppUnit_DEBUG_LIBRARIES})
+    target_link_libraries(test GameFramed)
 else (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    #message(FATAL_ERROR "Not building release versions! -${CMAKE_BUILD_TYPE} -${CppUnit_DEBUG_LIBRARIES} -${CppUnit_LIBRARIES}")
-    target_link_libraries(test ${CppUnit_LIBRARIES})
+    target_link_libraries(test GameFrame)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+target_link_libraries(test
+    #debug GameFramed
+    #general GameFrame
+    ${GameFrame_EXTRA_LIBS}
+    ${Boost_LIBRARIES}
+    debug ${CppUnit_DEBUG_LIBRARIES}
+    general ${CppUnit_LIBRARIES})
+    
+#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#    target_link_libraries(test ${CppUnit_DEBUG_LIBRARIES})
+#else (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#    #message(FATAL_ERROR "Not building release versions! -${CMAKE_BUILD_TYPE} -${CppUnit_DEBUG_LIBRARIES} -${CppUnit_LIBRARIES}")
+#    target_link_libraries(test ${CppUnit_LIBRARIES})
+#endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 if (UNIX)
     add_custom_command(TARGET test POST_BUILD COMMAND ${EXECUTABLE_OUTPUT_PATH}/test)

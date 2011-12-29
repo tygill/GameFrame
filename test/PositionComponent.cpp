@@ -1,5 +1,7 @@
 #include "PositionComponent.h"
 
+GF_REGISTER_COMPONENT(PositionComponent);
+
 PositionComponent::PositionComponent() :
     xPos(0.0),
     yPos(0.0)

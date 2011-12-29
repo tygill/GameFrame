@@ -18,7 +18,20 @@ file(GLOB GameFrame_DEMO_H "*.h")
 
 add_executable(demo ${GameFrame_DEMO_CXX} ${GameFrame_DEMO_H})
 #target_link_libraries(demo ${GameFrame_LIBS} ${Boost_LIBRARIES} GameFrameSDL ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY})
-target_link_libraries(demo GameFrame ${GameFrame_EXTRA_LIBS} GameFrameSDL ${GameFrameSDL_EXTRA_LIBS})
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_libraries(demo GameFramed GameFrameSDLd)
+else (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_libraries(demo GameFrame GameFrameSDL)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+target_link_libraries(demo
+    #debug GameFramed
+    #general GameFrame
+    ${GameFrame_EXTRA_LIBS}
+    #debug GameFrameSDLd
+    #general GameFrameSDL
+    ${GameFrameSDL_EXTRA_LIBS})
 
 if (UNIX)
     #add_custom_command(TARGET test POST_BUILD COMMAND ${EXECUTABLE_OUTPUT_PATH}/test)

@@ -7,6 +7,8 @@
 class PositionComponent : public gf::EntityComponent {
 public:
     PositionComponent();
+
+    GF_DECLARE_COMPONENT;
     
     double x() const;
     void setX(double newX);

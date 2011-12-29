@@ -87,9 +87,9 @@ namespace gf {
     }
 
     // DEBUG
-    void EntityManager::print() {
-        components->print();
-    }
+    //void EntityManager::print() {
+    //    components->print();
+    //}
     
     EntityPtr EntityManager::getEntity(EntityId entId) {
         EntityMap::iterator pos = entities.find(entId);
@@ -205,9 +205,9 @@ namespace gf {
     }
 
     // DEBUG
-    void EntityManager::EntityComponentTree::print() {
-        std::cout << *root.get() << std::endl;
-    }
+    //void EntityManager::EntityComponentTree::print() {
+    //    std::cout << *root.get() << std::endl;
+    //}
     
     void EntityManager::EntityComponentTree::addComponent(ConstEntityPtr entity, ComponentType type, const OrderedComponentTypes& types, EntityManager::EntityComponentTree::Node node) {
         if (node) {
@@ -343,6 +343,7 @@ namespace gf {
         return nextNodes;
     }
 
+        /*
     std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node) {
         out << "{\n[";
         bool first = true;
@@ -365,5 +366,6 @@ namespace gf {
         out << "\n}";
         return out;
     }
+        */
     
 }

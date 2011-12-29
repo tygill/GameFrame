@@ -4,24 +4,50 @@
 
 #include "gf/Global.h"
 
+// Some helper macros to hide the implementation of declaring and
+// registering component types in component classes
+
+// This should go in the body of the declaration of the new component class
+#define GF_DECLARE_COMPONENT \
+    public:\
+        gf::ComponentType type() const;\
+        static gf::ComponentType staticType();\
+    private:\
+        static gf::ComponentType staticComponentType;\
+    public:
+// This should be placed in the .cpp file for the component class, and will
+// do the static registration of the type without RTTI
+#define GF_REGISTER_COMPONENT(componentClass) \
+    gf::ComponentType componentClass::type() const {\
+        return staticComponentType;\
+    }\
+    gf::ComponentType componentClass::staticType() {\
+        return staticComponentType;\
+    }\
+    gf::ComponentType componentClass::staticComponentType = gf::EntityComponent::registerType();
+
 namespace gf {
     
     class EntityComponent {
     public:
-        EntityComponent() {}
-        virtual ~EntityComponent() {}
+        EntityComponent();
+        virtual ~EntityComponent();
         
-        // ComponentType is simply the typeid() of the subclass, but this should
-        // hide away that abstraction, and allow access no matter what type of
-        // reference you have to the component.
+        // This will reimplment the virtual functions for type identifiation,
+        // and add the public static type 
+        // GF_DECLARE_COMPONENT;
         
-        // When you have an actual component
-        ComponentType type() const;
-        // When you have an unknown component
-        //static ComponentType type(EntityComponent* component);
-        // When you know the name of the components type
-        //template<class T> static ComponentType getType();
-        // Supersceded by the global componentType<T>() function
+        // If this implmentation is every called, a MethodNotDefinedException will be thrown.
+        // The GF_*_COMPONENT macros should define this function virtually.
+        virtual ComponentType type() const;
+
+    public:
+        // Static type registration
+        static ComponentType registerType();
+
+    private:
+        static ComponentType nextRegistrationType;
+
     };
     
 }

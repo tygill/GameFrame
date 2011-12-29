@@ -8,6 +8,8 @@ class DummyResource : public gf::Resource {
 public:
     DummyResource() {}
     ~DummyResource() {}
+
+    GF_DECLARE_RESOURCE;
 };
 
 #endif // header

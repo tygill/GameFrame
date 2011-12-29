@@ -1,5 +1,7 @@
 #include "VelocityComponent.h"
 
+GF_REGISTER_COMPONENT(VelocityComponent);
+
 VelocityComponent::VelocityComponent() :
     speed(0.0),
     angle(0.0)

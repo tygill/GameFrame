@@ -23,7 +23,7 @@ namespace gf {
         
         // Setup systems
         void registerSystem(EntitySystem* system, MessageType type);
-        
+
     private:
         typedef boost::unordered_map<MessageType, boost::unordered_set<EntitySystem*> > MessageMap;
         MessageMap messageMap;
@@ -34,7 +34,7 @@ namespace gf {
         boost::shared_ptr<T> message(new T());
         send(message);
     }
-    
+
 }
 
 #endif // header

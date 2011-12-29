@@ -6,19 +6,6 @@
 
 namespace gf {
 
-ComponentType componentType(ComponentPtr comp) {
-    return comp->type();
-    //return ComponentType(typeid(*comp.get()));
-}
-
-ResourceType resourceType(ResourcePtr res) {
-    return res->type();
-    //return ResourceType(typeid(*res.get()));
-}
-
-MessageType messageType(MessagePtr mess) {
-    return mess->type();
-    //return MessageType(typeid(*mess.get()));
-}
+    // Nothing anymore
 
 }

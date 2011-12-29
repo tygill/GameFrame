@@ -1,3 +1,4 @@
 #include "gf/core/CoreMessages.h"
 
-// Nothing here...
+GF_REGISTER_MESSAGE(gf::core::CoreMessage);
+GF_REGISTER_MESSAGE(gf::core::QuitMessage);

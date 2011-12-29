@@ -49,7 +49,7 @@ namespace gf {
         void registerSystem(EntitySystem* system, const ComponentTypes& types);
         
         // DEBUG
-        void print();
+        //void print();
         class EntityComponentTree;
 
     private:
@@ -99,7 +99,7 @@ namespace gf {
         void registerSystem(EntitySystem* system, const EntityManager::OrderedComponentTypes& types);
         
         // DEBUG
-        void print();
+        //void print();
         class EntityComponentTreeNode;
 
     private:
@@ -139,7 +139,7 @@ namespace gf {
         EntityManager::EntityComponentTree::Node getNext(ComponentType type, bool allowCreate = false);
         
         // DEBUG
-        friend std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node);
+        //friend std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node);
 
     private:
         friend class EntityManager::EntityComponentTree;
@@ -154,7 +154,7 @@ namespace gf {
         
     };
     // DEBUG
-    std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node);
+    //std::ostream& operator<<(std::ostream& out, const EntityManager::EntityComponentTree::EntityComponentTreeNode& node);
     
     // Template functions for EntityManager
     // ------------------------------------

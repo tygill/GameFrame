@@ -13,12 +13,16 @@ namespace gf {
             CoreMessage() {}
             ~CoreMessage() {}
 
+            GF_DECLARE_MESSAGE;
+
         };
 
         class QuitMessage : public CoreMessage {
         public:
             QuitMessage() {}
             ~QuitMessage() {}
+
+            GF_DECLARE_MESSAGE;
 
         };
         

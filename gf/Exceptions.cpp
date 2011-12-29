@@ -24,6 +24,17 @@ namespace gf {
     void GameFrameException::setMessage(const std::string& msg) throw() {
         message = msg;
     }
+
+    // MethodNotDefinedException
+    // -------------------------
+
+    MethodNotDefinedException::MethodNotDefinedException(const std::string& msg) :
+        GameFrameException(msg)
+    {
+    }
+
+    MethodNotDefinedException::~MethodNotDefinedException() {
+    }
     
     // EntityNotFoundException
     // -----------------------

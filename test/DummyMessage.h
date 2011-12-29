@@ -9,7 +9,7 @@ public:
     DummyMessage() {}
     ~DummyMessage() {}
 
-    //gf::MessageType type() const {return gf::messageType<DummyMessage>();}
+    GF_DECLARE_MESSAGE;
 
 };
 

@@ -16,12 +16,12 @@ void ResourceManagerTest::resourceTypeGeneration() {
     gf::ResourcePtr dummy(new DummyResource());
 
     // Test type comparisons
-    CPPUNIT_ASSERT(dummy->type() != gf::resourceType<gf::Resource>());
-    CPPUNIT_ASSERT(dummy->type() == gf::messageType<DummyResource>());
+    //CPPUNIT_ASSERT(dummy->type() != gf::resourceType<gf::Resource>());
+    CPPUNIT_ASSERT(dummy->type() == gf::resourceType<DummyResource>());
 
     // Slightly obsolete method of type checking...but possibly will be kept, as it might prove better in the future.
     // typeid() & RTTI are weird, and replacing it with some sort of global registry might be better....
-    CPPUNIT_ASSERT(gf::resourceType(dummy) == gf::resourceType<DummyResource>());
+    CPPUNIT_ASSERT(dummy->type() == gf::resourceType<DummyResource>());
 }
 
 void ResourceManagerTest::createResource() {
